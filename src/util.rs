@@ -47,50 +47,42 @@ macro_rules! slice_like {
     };
 }
 
-use syn::{Expr, ExprLit, ExprUnary, Lit};
 pub(crate) use slice_like;
+use syn::{Expr, ExprLit, ExprUnary, Lit};
 
 pub(crate) fn unwind_expr_to_isize(expr: Option<Box<Expr>>) -> Result<Option<isize>, &'static str> {
     match expr {
-        Some(boxed) => {
-            match *boxed {
-                Expr::Lit(ExprLit { lit: Lit::Int(lit), .. }) => {
-                    Ok(
-                        lit.base10_parse::<isize>()
-                            .map_err(|_| "expects ranges of integers")?
-                            .into()
-                    )
-                }
-                Expr::Unary(
-                    ExprUnary {
-                        op: syn::UnOp::Neg(_),
-                        expr,
-                        ..
-                    }
-                ) => {
-                    match *expr {
-                        Expr::Lit(ExprLit { lit: Lit::Int(lit), .. }) => {
-                            Ok(
-                                lit.base10_parse::<isize>()
-                                    .map_err(|_| "expects ranges of integers")?
-                                    .checked_neg()
-                                    .ok_or("expects ranges of integers")?
-                                    .into()
-                            )
-                        }
-                        _ => Err("expects ranges of integers"),
-                    }
-                }
+        Some(boxed) => match *boxed {
+            Expr::Lit(ExprLit {
+                lit: Lit::Int(lit), ..
+            }) => Ok(lit
+                .base10_parse::<isize>()
+                .map_err(|_| "expects ranges of integers")?
+                .into()),
+            Expr::Unary(ExprUnary {
+                op: syn::UnOp::Neg(_),
+                expr,
+                ..
+            }) => match *expr {
+                Expr::Lit(ExprLit {
+                    lit: Lit::Int(lit), ..
+                }) => Ok(lit
+                    .base10_parse::<isize>()
+                    .map_err(|_| "expects ranges of integers")?
+                    .checked_neg()
+                    .ok_or("expects ranges of integers")?
+                    .into()),
                 _ => Err("expects ranges of integers"),
-            }
-        }
+            },
+            _ => Err("expects ranges of integers"),
+        },
         None => Ok(None),
     }
 }
 
 pub fn start_to_usize(source_len: usize, index: Option<isize>) -> usize {
     match index {
-        Some(index) if index < 0 => source_len - index.abs() as usize,
+        Some(index) if index < 0 => source_len - index.unsigned_abs(),
         Some(index) => index as usize,
         None => 0,
     }
@@ -98,7 +90,7 @@ pub fn start_to_usize(source_len: usize, index: Option<isize>) -> usize {
 
 pub fn end_to_usize(source_len: usize, index: Option<isize>) -> usize {
     match index {
-        Some(index) if index < 0 => source_len - index.abs() as usize,
+        Some(index) if index < 0 => source_len - index.unsigned_abs(),
         Some(index) => index as usize,
         None => source_len,
     }

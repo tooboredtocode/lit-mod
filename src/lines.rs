@@ -16,7 +16,6 @@ pub fn lines(input: TokenStream) -> TokenStream {
         let start = start_to_usize(source_len, range.0);
         let end = end_to_usize(source_len, range.1) - start;
 
-
         source.lines().skip(start).take(end).for_each(|s| {
             result.push_str(s);
             result.push('\n');
