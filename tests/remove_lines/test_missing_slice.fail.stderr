@@ -1,0 +1,7 @@
+error: unexpected end of input, remove_lines! expects at least one range
+ --> tests/remove_lines/test_missing_slice.fail.rs:4:13
+  |
+4 |     let s = remove_lines!("Hello, world!");
+  |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the macro `remove_lines` (in Nightly builds, run with -Z macro-backtrace for more info)

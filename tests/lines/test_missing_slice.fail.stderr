@@ -1,0 +1,7 @@
+error: unexpected end of input, lines! expects at least one range
+ --> tests/lines/test_missing_slice.fail.rs:4:13
+  |
+4 |     let s = lines!("Hello, world!");
+  |             ^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the macro `lines` (in Nightly builds, run with -Z macro-backtrace for more info)

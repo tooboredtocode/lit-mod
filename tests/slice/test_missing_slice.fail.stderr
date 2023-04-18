@@ -1,0 +1,7 @@
+error: unexpected end of input, slice! expects at least one range
+ --> tests/slice/test_missing_slice.fail.rs:4:13
+  |
+4 |     let s = slice!("Hello, world!");
+  |             ^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the macro `slice` (in Nightly builds, run with -Z macro-backtrace for more info)

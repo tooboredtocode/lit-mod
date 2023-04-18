@@ -1,0 +1,5 @@
+error: replace! only accepts 2 or 3 arguments
+ --> tests/replace/test_replace.fail.rs:4:46
+  |
+4 |     replace!("Hello, world!", "world", "Rust", "Noooooo");
+  |                                              ^

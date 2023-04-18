@@ -1,0 +1,24 @@
+[package]
+name = "lit-mod"
+version = "0.1.0"
+edition = "2021"
+authors = ["tooboredtocode"]
+license = "ISC"
+description = "lit-mod is a collection of procedural macros for working with string literals."
+repository = "https://github.com/tooboredtocode/lit-mod"
+keywords = ["literal", "procedural", "macro"]
+categories = ["development-tools::procedural-macros"]
+readme = "README.md"
+documentation = "https://docs.rs/lit-mod"
+homepage = "https://github.com/tooboredtocode/lit-mod"
+exclude = [".github/*"]
+rust-version = "1.64"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = { version = "2.0", features = ["full"] }
+
+[dev-dependencies]
+trybuild = "1.0"
