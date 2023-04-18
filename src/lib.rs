@@ -51,7 +51,7 @@ pub fn replace(input: TokenStream) -> TokenStream {
 
 /// Replaces the literal with a slice of the literal.
 ///
-/// *Note:* This macro doesnt slice by bytes, but by characters.
+/// *Note:* This macro doesn't slice by bytes, but by characters.
 ///
 /// # Examples
 ///
