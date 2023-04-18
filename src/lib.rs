@@ -61,7 +61,7 @@ pub fn replace(input: TokenStream) -> TokenStream {
 /// use lit_mod::slice;
 ///
 /// assert_eq!("world!", slice!("Hello, world!", 7..));
-/// assert_eq!("Hello", slice!("Hello, world!", ..5));
+/// assert_eq!("Hello", slice!("Hello, world!", ..-8));
 /// ```
 #[proc_macro]
 pub fn slice(input: TokenStream) -> TokenStream {
@@ -83,7 +83,7 @@ pub fn slice(input: TokenStream) -> TokenStream {
 /// );
 /// assert_eq!(
 ///     "This is lines",
-///     lines!("Hello, world!\nThis is lines", 1..2)
+///     lines!("Hello, world!\nThis is lines", -1..)
 /// );
 /// ```
 #[proc_macro]
@@ -102,7 +102,7 @@ pub fn lines(input: TokenStream) -> TokenStream {
 ///
 /// assert_eq!(
 ///     "Hello, world!",
-///     remove_lines!("Hello, world!\nThis is lines", 1..)
+///     remove_lines!("Hello, world!\nThis is lines", -1..)
 /// );
 /// assert_eq!(
 ///     "This is lines",

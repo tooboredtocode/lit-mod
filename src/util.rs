@@ -1,12 +1,12 @@
 macro_rules! slice_like {
     ($name:literal) => {
-        use syn::__private::ToTokens;
-        use syn::{Expr, ExprLit, ExprRange, Lit, LitStr, parse_macro_input, RangeLimits, Token};
+        use crate::util::unwind_expr_to_isize;
+        use syn::{ExprRange, LitStr, RangeLimits, Token};
         use syn::parse::{Parse, ParseStream, Result};
 
         struct Slice {
             source: LitStr,
-            ranges: Vec<(Option<usize>, Option<usize>)>,
+            ranges: Vec<(Option<isize>, Option<isize>)>,
         }
 
         impl Parse for Slice {
@@ -20,34 +20,10 @@ macro_rules! slice_like {
 
                 while !input.is_empty() {
                     let range = input.parse::<ExprRange>()?;
-
-                    let start = match range.start {
-                        Some(boxed) => {
-                            match *boxed {
-                                Expr::Lit(ExprLit { lit: Lit::Int(lit), .. }) => {
-                                    lit.base10_parse::<usize>()
-                                        .map_err(|_| input.error(concat!($name, " expects valid ranges")))?
-                                        .into()
-                                }
-                                _ => return Err(input.error(concat!($name, " expects ranges of integers"))),
-                            }
-                        }
-                        None => None,
-                    };
-
-                    let end = match range.end {
-                        Some(boxed) => {
-                            match *boxed {
-                                Expr::Lit(ExprLit { lit: Lit::Int(lit), .. }) => {
-                                    lit.base10_parse::<usize>()
-                                        .map_err(|_| input.error(concat!($name, " expects valid ranges")))?
-                                        .into()
-                                }
-                                _ => return Err(input.error(concat!($name, " expects ranges of integers"))),
-                            }
-                        }
-                        None => None,
-                    };
+                        let start = unwind_expr_to_isize(range.start)
+                            .map_err(|err| input.error(format!("{} {}", $name, err)))?;
+                        let end = unwind_expr_to_isize(range.end)
+                            .map_err(|err| input.error(format!("{} {}", $name, err)))?;
 
                     if let (Some(start), Some(end)) = (start, end) {
                         if start > end {
@@ -71,4 +47,59 @@ macro_rules! slice_like {
     };
 }
 
+use syn::{Expr, ExprLit, ExprUnary, Lit};
 pub(crate) use slice_like;
+
+pub(crate) fn unwind_expr_to_isize(expr: Option<Box<Expr>>) -> Result<Option<isize>, &'static str> {
+    match expr {
+        Some(boxed) => {
+            match *boxed {
+                Expr::Lit(ExprLit { lit: Lit::Int(lit), .. }) => {
+                    Ok(
+                        lit.base10_parse::<isize>()
+                            .map_err(|_| "expects ranges of integers")?
+                            .into()
+                    )
+                }
+                Expr::Unary(
+                    ExprUnary {
+                        op: syn::UnOp::Neg(_),
+                        expr,
+                        ..
+                    }
+                ) => {
+                    match *expr {
+                        Expr::Lit(ExprLit { lit: Lit::Int(lit), .. }) => {
+                            Ok(
+                                lit.base10_parse::<isize>()
+                                    .map_err(|_| "expects ranges of integers")?
+                                    .checked_neg()
+                                    .ok_or("expects ranges of integers")?
+                                    .into()
+                            )
+                        }
+                        _ => Err("expects ranges of integers"),
+                    }
+                }
+                _ => Err("expects ranges of integers"),
+            }
+        }
+        None => Ok(None),
+    }
+}
+
+pub fn start_to_usize(source_len: usize, index: Option<isize>) -> usize {
+    match index {
+        Some(index) if index < 0 => source_len - index.abs() as usize,
+        Some(index) => index as usize,
+        None => 0,
+    }
+}
+
+pub fn end_to_usize(source_len: usize, index: Option<isize>) -> usize {
+    match index {
+        Some(index) if index < 0 => source_len - index.abs() as usize,
+        Some(index) => index as usize,
+        None => source_len,
+    }
+}

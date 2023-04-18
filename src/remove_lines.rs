@@ -1,5 +1,7 @@
-use crate::util::slice_like;
+use crate::util::{end_to_usize, slice_like, start_to_usize};
 use proc_macro::TokenStream;
+use syn::__private::ToTokens;
+use syn::parse_macro_input;
 
 slice_like!("remove_lines!");
 
@@ -7,14 +9,15 @@ pub fn remove_lines(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as Slice);
 
     let source = input.source.value();
+    let source_len = source.lines().count();
     let mut result = String::new();
 
     let mut iter = source.lines().skip(0);
     let mut prev = 0;
 
     for range in input.ranges {
-        let start = range.0.unwrap_or(0) - prev;
-        let end = range.1.unwrap_or(input.source.value().len());
+        let start = start_to_usize(source_len, range.0) - prev;
+        let end = end_to_usize(source_len, range.1);
 
         iter.take(start).for_each(|line| {
             result.push_str(line);
